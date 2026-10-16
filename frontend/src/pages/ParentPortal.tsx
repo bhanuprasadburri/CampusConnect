@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { apiClient } from '../api/client';
-import { Assignment, FeeRecord, Notice, Notification, ParentWardOverview, SemesterResult, StudentProfile } from '../types';
+import { Assignment, AttendanceRecord, FeeRecord, Notice, Notification, ParentWardOverview, SemesterResult, StudentProfile } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { getUpcomingExams, Exam } from '../data/exams';
 import {
   Activity, AlertTriangle, ArrowRight, Award, BookOpen, CalendarDays,
-  Check, CheckCircle2, ChevronDown, Circle, CircleAlert, ClipboardList, Clock3,
+  Check, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, Circle, CircleAlert,
+  CircleCheck, CircleX, ClipboardList, Clock3,
   CreditCard, Download, ExternalLink, Eye, FileBadge,
   FileCheck2, FileSpreadsheet, FileText, Filter, GraduationCap,
   HeartHandshake, Home, IndianRupee, Info, Layers, Lock,
@@ -43,6 +44,40 @@ const dateLabel = (value?: string) =>
 
 const dateTimeLabel = (value?: string) =>
   value ? new Date(value).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+
+const dateKey = (date: Date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+/* Weekly schedule constants (mirrors the student academic-calendar view) */
+const scheduleDays = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+const schedulePeriods = [
+  { start: '09:00 AM', end: '09:50 AM' },
+  { start: '10:00 AM', end: '10:50 AM' },
+  { start: '11:00 AM', end: '11:50 AM' },
+  { start: '11:50 AM', end: '12:40 PM' },
+  { start: '01:30 PM', end: '02:20 PM' },
+  { start: '02:20 PM', end: '03:10 PM' },
+  { start: '03:10 PM', end: '04:00 PM' },
+];
+const scheduleSubjectAccents = [
+  { background: '#e5f1ff', color: '#1677f2' },
+  { background: '#e5f8ef', color: '#159766' },
+  { background: '#f0eaff', color: '#7651d6' },
+  { background: '#fff1e4', color: '#e88422' },
+  { background: '#ffebf2', color: '#d74683' },
+  { background: '#e5f8fb', color: '#1299ac' },
+  { background: '#f2eaff', color: '#a14db5' },
+];
+
+const toMinutes = (time: string) => {
+  const [clock, meridiem] = time.split(' ');
+  let [hour, minute] = clock.split(':').map(Number);
+  if (meridiem === 'PM' && hour !== 12) hour += 12;
+  if (meridiem === 'AM' && hour === 12) hour = 0;
+  return hour * 60 + minute;
+};
+
+const scheduleDayName = (day: string) => day.charAt(0) + day.slice(1).toLowerCase();
 
 const wardStorageKey = (username: string) => `campusconnect.parent.ward.${username}`;
 
@@ -401,7 +436,13 @@ const ParentSection: React.FC<{
   const navigate = useNavigate();
   const { profile, attendance, attendanceHistory, results, assignments, fees, notices, notifications, timetable, requests } = data;
 
-  const [attendancePeriod, setAttendancePeriod] = useState<'month' | 'semester'>('semester');
+  const [attendanceMonth, setAttendanceMonth] = useState(() => {
+    const today = new Date();
+    return new Date(today.getFullYear(), today.getMonth(), 1);
+  });
+  const [attendanceDate, setAttendanceDate] = useState(() => dateKey(new Date()));
+  const [attendanceSubjectFilter, setAttendanceSubjectFilter] = useState('ALL');
+  const [attendanceStatusFilter, setAttendanceStatusFilter] = useState('ALL');
   const [selectedSemester, setSelectedSemester] = useState(String(profile.currentSemester || 5));
 
   const paidTotal = fees.filter((fee) => fee.status === 'PAID').reduce((sum, fee) => sum + fee.amount, 0);
@@ -841,161 +882,282 @@ const ParentSection: React.FC<{
   }
 
   if (section === 'attendance') {
-    const displayedRecords =
-      attendancePeriod === 'month'
-        ? attendanceHistory.filter((record) => record.sessionDate.slice(0, 7) === new Date().toISOString().slice(0, 7))
-        : attendanceHistory;
+    const presentCount = attendanceHistory.filter((record) => record.status === 'PRESENT').length;
+    const absentCount = attendanceHistory.filter((record) => record.status === 'ABSENT').length;
+    const onDutyCount = attendanceHistory.filter((record) => record.status === 'ON_DUTY').length;
+
+    const recordsByDate = new Map<string, AttendanceRecord[]>();
+    attendanceHistory.forEach((record) => {
+      const key = record.sessionDate.slice(0, 10);
+      recordsByDate.set(key, [...(recordsByDate.get(key) || []), record]);
+    });
+
+    const year = attendanceMonth.getFullYear();
+    const month = attendanceMonth.getMonth();
+    const firstOffset = (new Date(year, month, 1).getDay() + 6) % 7;
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const leadingCells = Array.from({ length: firstOffset }, () => null);
+    const monthDays = Array.from({ length: daysInMonth }, (_, index) => index + 1);
+    const trailingCount = (7 - ((leadingCells.length + monthDays.length) % 7)) % 7;
+    const calendarCells: Array<number | null> = [
+      ...leadingCells,
+      ...monthDays,
+      ...Array.from({ length: trailingCount }, () => null),
+    ];
+
+    const selectedRecords = [...(recordsByDate.get(attendanceDate) || [])].sort(
+      (a, b) => a.periodNumber - b.periodNumber
+    );
+    const visibleRecords = selectedRecords.filter(
+      (record) =>
+        (attendanceSubjectFilter === 'ALL' || record.subjectCode === attendanceSubjectFilter) &&
+        (attendanceStatusFilter === 'ALL' || record.status === attendanceStatusFilter)
+    );
+    const selectedDateLabel = new Date(`${attendanceDate}T00:00:00`).toLocaleDateString('en-US', {
+      weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
+    });
+    const selectedDateShort = new Date(`${attendanceDate}T00:00:00`).toLocaleDateString('en-US', {
+      day: '2-digit', month: 'short', year: 'numeric',
+    });
+    const selectedDayShort = new Date(`${attendanceDate}T00:00:00`).toLocaleDateString('en-US', { weekday: 'short' });
 
     return (
       <>
-        <section className="parent-metrics-grid compact">
-          <Metric
-            label="Overall Attendance"
-            value={`${attendance.overallPercentage}%`}
-            detail={attendance.requirementNote || 'Minimum 75% required'}
-            icon={CalendarDays}
-            tone={attendance.overallPercentage >= 75 ? 'blue' : 'orange'}
-          />
-          <Metric
-            label="Attended Sessions"
-            value={String(attendance.totalAttended)}
-            detail="Recorded as present"
-            icon={CheckCircle2}
-            tone="green"
-          />
-          <Metric
-            label="Missed Sessions"
-            value={String(attendance.totalMissed)}
-            detail="Recorded as absent"
-            icon={AlertTriangle}
-            tone={attendance.totalMissed > 0 ? 'orange' : 'green'}
-          />
-          <Metric
-            label="Total Working Sessions"
-            value={String(attendance.totalConducted)}
-            detail="Conducted this semester"
-            icon={BookOpen}
-            tone="purple"
-          />
-        </section>
-
-        {shortageSubjects.length > 0 && (
-          <div className="parent-alert">
+        {(attendance.overallPercentage < 75 || shortageSubjects.length > 0) && (
+          <div className="attendance-alert">
             <AlertTriangle size={20} />
-            <div>
-              <strong>Attendance Shortage Warning</strong>
-              <p>
-                The following subjects currently have attendance below the mandatory 75% threshold:{' '}
-                {shortageSubjects.map((sub) => `${sub.subjectName} (${sub.percentage}%)`).join(', ')}.
-              </p>
-            </div>
+            <span>
+              <strong>Attendance Shortage Alert:</strong>{' '}
+              {attendance.overallPercentage < 75
+                ? `${profile.firstName}'s overall attendance is below the mandatory 75% threshold.`
+                : `${profile.firstName} is below the mandatory 75% threshold in some subjects.`}
+              {shortageSubjects.length > 0 &&
+                ` Subjects in shortage: ${shortageSubjects.map((sub) => `${sub.subjectName} (${sub.percentage}%)`).join(', ')}.`}
+            </span>
           </div>
         )}
 
-        <div className="parent-dashboard-grid">
-          <Panel title="Subject-wise Attendance Breakdown" icon={BookOpen}>
-            <div className="parent-subject-bars large">
-              {attendance.subjectAttendance.map((subject) => (
-                <div key={subject.subjectId}>
-                  <div>
-                    <span>
-                      {subject.subjectName}
-                      <small>
-                        {subject.totalAttended} present of {subject.totalConducted} sessions conducted
-                      </small>
-                    </span>
-                    <strong className={subject.percentage < 75 ? 'text-warning' : ''}>
-                      {subject.percentage}%
-                    </strong>
-                  </div>
-                  <i>
-                    <b
-                      className={subject.percentage < 75 ? 'warning' : ''}
-                      style={{ width: `${Math.max(0, Math.min(100, subject.percentage))}%` }}
-                    />
-                  </i>
-                </div>
-              ))}
+        <div className="attendance-stat-grid">
+          <div className="attendance-stat-card overall">
+            <div
+              className="attendance-ring"
+              style={{ '--percent': `${attendance.overallPercentage}%` } as React.CSSProperties}
+            >
+              <span>{attendance.overallPercentage}%</span>
             </div>
-          </Panel>
-
-          <Panel title="Attendance Trend & Period View" icon={TrendingUp}>
-            <div className="parent-chart-summary">
+            <div className="attendance-stat-copy">
+              <span>Overall Attendance</span>
               <strong>
-                {attendancePeriod === 'month' ? attendance.monthlyPercentage : attendance.overallPercentage}%
+                {attendance.totalAttended} / {attendance.totalConducted} Classes
               </strong>
-              <span>{attendancePeriod === 'month' ? 'Current Month Attendance' : 'Semester Total Attendance'}</span>
-              <small>{attendanceHistory.length} total logged sessions</small>
+              <small>{attendance.totalMissed} classes missed</small>
             </div>
-            <div className="parent-week-chart attendance-chart">
-              {weeklyAttendance.map((week) => (
-                <div key={week.label}>
-                  <span style={{ height: `${Math.max(8, week.value)}%` }} title={`${week.value}%`} />
-                  <small>{week.label}</small>
-                </div>
-              ))}
-            </div>
-            <div className="parent-period-switch">
-              <button
-                className={attendancePeriod === 'month' ? 'active' : ''}
-                onClick={() => setAttendancePeriod('month')}
-              >
-                Monthly View
-              </button>
-              <button
-                className={attendancePeriod === 'semester' ? 'active' : ''}
-                onClick={() => setAttendancePeriod('semester')}
-              >
-                Semester View
-              </button>
-            </div>
-          </Panel>
+          </div>
+          <div className="attendance-stat-card present">
+            <span className="attendance-stat-icon"><CircleCheck size={22} /></span>
+            <div className="attendance-stat-copy"><span>Present</span><strong>{presentCount}</strong><small>Classes</small></div>
+          </div>
+          <div className="attendance-stat-card absent">
+            <span className="attendance-stat-icon"><CircleX size={22} /></span>
+            <div className="attendance-stat-copy"><span>Absent</span><strong>{absentCount}</strong><small>Classes</small></div>
+          </div>
+          <div className="attendance-stat-card onduty">
+            <span className="attendance-stat-icon"><Clock3 size={22} /></span>
+            <div className="attendance-stat-copy"><span>On Duty</span><strong>{onDutyCount}</strong><small>Classes</small></div>
+          </div>
         </div>
 
-        <Panel
-          title={`${attendancePeriod === 'month' ? 'Current Month' : 'Semester'} Detailed Attendance Log`}
-          icon={FileText}
-        >
-          <div className="parent-table-wrap">
-            <table className="parent-table">
-              <thead>
-                <tr>
-                  <th>Session Date</th>
-                  <th>Period</th>
-                  <th>Subject</th>
-                  <th>Status</th>
-                  <th>Remarks</th>
-                </tr>
-              </thead>
-              <tbody>
-                {displayedRecords.slice(0, 50).map((record) => (
-                  <tr key={record.id}>
-                    <td>{dateLabel(record.sessionDate)}</td>
-                    <td>Period {record.periodNumber}</td>
-                    <td>{record.subjectName}</td>
-                    <td>
-                      <span className={`parent-pill ${record.status === 'PRESENT' ? 'success' : 'warning'}`}>
-                        {record.status.replace(/_/g, ' ')}
+        <div className="attendance-overview-layout">
+          <section className="card attendance-subject-card">
+            <div className="head">
+              <h2>Subject-wise Attendance</h2>
+              <span className="attendance-subject-period">This Semester</span>
+            </div>
+            <div className="attendance-subject-heading">
+              <h3>Course</h3>
+              <span>This month: {attendance.monthlyPercentage}% overall</span>
+            </div>
+            <div className="attendance-subject-list">
+              {attendance.subjectAttendance.map((subject) => (
+                <div key={subject.subjectId} className="attendance-subject-row">
+                  <div className="attendance-subject-info">
+                    <div>
+                      <strong>{subject.subjectName}</strong>
+                      <small>
+                        {subject.subjectCode} · {subject.totalAttended}/{subject.totalConducted} attended
+                      </small>
+                    </div>
+                    <b style={{ color: subject.percentage < 75 ? '#dc2626' : '#1767c2' }}>{subject.percentage}%</b>
+                  </div>
+                  <div className="attendance-progress">
+                    <span
+                      style={{
+                        width: `${subject.percentage}%`,
+                        background: subject.percentage < 75 ? '#ef4444' : undefined,
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+              {!attendance.subjectAttendance.length && <Empty text="No subject-wise attendance recorded yet." />}
+            </div>
+          </section>
+
+          <section className="card attendance-calendar-card">
+            <div className="attendance-calendar-header">
+              <div>
+                <h2>Attendance Overview</h2>
+                <span className="attendance-calendar-subtitle">Select a date to view recorded classes</span>
+              </div>
+              <div className="attendance-month-picker">
+                <CalendarDays size={14} />
+                <strong>{attendanceMonth.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</strong>
+                <div className="attendance-month-controls">
+                  <button
+                    className="btn"
+                    aria-label="Previous month"
+                    onClick={() => setAttendanceMonth(new Date(year, month - 1, 1))}
+                  >
+                    <ChevronLeft size={15} />
+                  </button>
+                  <button
+                    className="btn"
+                    aria-label="Next month"
+                    onClick={() => setAttendanceMonth(new Date(year, month + 1, 1))}
+                  >
+                    <ChevronRight size={15} />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="attendance-calendar-grid">
+              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
+                <div key={day} className="attendance-weekday">{day}</div>
+              ))}
+              {calendarCells.map((day, index) => {
+                if (day === null) return <div key={`empty-${index}`} className="attendance-day-empty" />;
+                const key = dateKey(new Date(year, month, day));
+                const records = recordsByDate.get(key) || [];
+                const allPresent = records.length > 0 && records.every((record) => record.status === 'PRESENT');
+                const hasPresent = records.some((record) => record.status === 'PRESENT');
+                const dayStatus = allPresent ? 'present' : hasPresent ? 'mixed' : records.length ? 'absent' : 'no-record';
+                const selected = attendanceDate === key;
+                return (
+                  <button
+                    key={key}
+                    className={`attendance-day ${dayStatus} ${selected ? 'selected' : ''}`}
+                    onClick={() => setAttendanceDate(key)}
+                    aria-label={`${key}${records.length ? `, ${records.filter((record) => record.status === 'PRESENT').length} of ${records.length} periods present` : ', no attendance recorded'}`}
+                    aria-pressed={selected}
+                  >
+                    <span className="attendance-day-number">{day}</span>
+                    {records.length > 0 && (
+                      <span className="attendance-day-meta">
+                        {records.filter((record) => record.status === 'PRESENT').length}/{records.length} present
                       </span>
-                    </td>
-                    <td>{record.remarks || 'Regular Session'}</td>
-                  </tr>
-                ))}
-                {!displayedRecords.length && (
-                  <tr>
-                    <td colSpan={5}>
-                      <Empty text="No attendance entries recorded for this period." />
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-          <p className="parent-readonly-note" style={{ marginTop: '12px' }}>
-            <ShieldCheck size={14} /> Attendance records are digitally updated by faculty members after each lecture.
-            Parents have read-only access.
-          </p>
-        </Panel>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="attendance-legend">
+              <span><i className="legend-dot present" /> All present</span>
+              <span><i className="legend-dot mixed" /> Mixed</span>
+              <span><i className="legend-dot absent" /> No periods present</span>
+            </div>
+          </section>
+        </div>
+
+        <div className="attendance-details-layout">
+          <section className="card attendance-date-card">
+            <div className="head">
+              <div>
+                <h2>
+                  {attendanceDate === dateKey(new Date()) ? "Today's Attendance Details" : 'Detailed Attendance'}
+                </h2>
+                <span className="attendance-detail-date">{selectedDateLabel}</span>
+              </div>
+              <div className="attendance-detail-controls">
+                <select
+                  aria-label="Filter by subject"
+                  value={attendanceSubjectFilter}
+                  onChange={(event) => setAttendanceSubjectFilter(event.target.value)}
+                >
+                  <option value="ALL">All Subjects</option>
+                  {attendance.subjectAttendance.map((subject) => (
+                    <option key={subject.subjectCode} value={subject.subjectCode}>
+                      {subject.subjectName}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  aria-label="Filter by status"
+                  value={attendanceStatusFilter}
+                  onChange={(event) => setAttendanceStatusFilter(event.target.value)}
+                >
+                  <option value="ALL">All Status</option>
+                  <option value="PRESENT">Present</option>
+                  <option value="ABSENT">Absent</option>
+                  <option value="ON_DUTY">On Duty</option>
+                  <option value="LATE">Late</option>
+                </select>
+              </div>
+            </div>
+            {selectedRecords.length === 0 ? (
+              <p className="attendance-empty">No attendance has been recorded for this date.</p>
+            ) : (
+              <div className="tablewrap">
+                <table className="attendance-date-table">
+                  <thead>
+                    <tr><th>Date</th><th>Day</th><th>Subject</th><th>Period</th><th>Status</th><th>Remarks</th></tr>
+                  </thead>
+                  <tbody>
+                    {visibleRecords.map((record) => (
+                      <tr key={record.id}>
+                        <td><strong>{selectedDateShort}</strong></td>
+                        <td>{selectedDayShort}</td>
+                        <td>{record.subjectName} <span className="attendance-course-code">({record.subjectCode})</span></td>
+                        <td>Period {record.periodNumber}</td>
+                        <td>
+                          <span className={`status-badge ${record.status === 'PRESENT' ? 'live' : record.status === 'ABSENT' ? 'due' : 'next'}`}>
+                            {record.status === 'PRESENT' && <CheckCircle2 size={11} />}
+                            {record.status}
+                          </span>
+                        </td>
+                        <td className="attendance-remarks">{record.remarks || '—'}</td>
+                      </tr>
+                    ))}
+                    {visibleRecords.length === 0 && (
+                      <tr><td colSpan={6} className="attendance-filter-empty">No records match these filters.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+          <aside className="card attendance-quick-info">
+            <h2><Info size={15} /> Quick Info</h2>
+            <dl>
+              <div><dt>Total Classes</dt><dd>{attendance.totalConducted}</dd></div>
+              <div><dt>Attended</dt><dd>{attendance.totalAttended}</dd></div>
+              <div><dt>Missed</dt><dd>{attendance.totalMissed}</dd></div>
+              <div><dt>On Duty</dt><dd>{onDutyCount}</dd></div>
+            </dl>
+            <div className="attendance-rules">
+              <strong><Info size={12} /> Attendance Rules</strong>
+              <ul>
+                <li>Minimum 75% attendance is required to be eligible for examinations.</li>
+                <li>Contact your class coordinator if a record needs correction.</li>
+              </ul>
+            </div>
+            <p className="parent-readonly-note">
+              <ShieldCheck size={14} /> Attendance records are digitally updated by faculty after each
+              lecture. Parents have read-only access.
+            </p>
+          </aside>
+        </div>
       </>
     );
   }
@@ -1167,7 +1329,7 @@ const ParentSection: React.FC<{
   }
 
   if (section === 'calendar') {
-    return <CalendarView notices={notices} timetable={timetable} exams={upcomingExams} />;
+    return <CalendarView notices={notices} timetable={timetable} exams={upcomingExams} profile={profile} />;
   }
 
   if (section === 'requests') {
@@ -2276,8 +2438,19 @@ const CalendarView: React.FC<{
   notices: Notice[];
   timetable: ParentWardOverview['timetable'];
   exams: Exam[];
-}> = ({ notices, timetable, exams }) => {
-  const [activeTab, setActiveTab] = useState<'events' | 'timetable'>('events');
+  profile: StudentProfile;
+}> = ({ notices, timetable, exams, profile }) => {
+  const [activeTab, setActiveTab] = useState<'schedule' | 'events'>('schedule');
+  const [now, setNow] = useState(new Date());
+  const weekdayIndex = (now.getDay() + 6) % 7;
+  const today = scheduleDays[weekdayIndex] ?? 'MONDAY';
+  const [selectedDay, setSelectedDay] = useState(today);
+  const [weekOffset, setWeekOffset] = useState(0);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const institutionalEvents = [
     { title: 'Mid-Semester Examinations Commencement', date: 'Oct 15, 2026', type: 'EXAMINATION', desc: 'Continuous internal evaluation exams for all branches.' },
@@ -2288,18 +2461,179 @@ const CalendarView: React.FC<{
     { title: 'Semester Winter Vacation & Reopening', date: 'Dec 24, 2026 - Jan 04, 2027', type: 'HOLIDAY', desc: 'Winter recess for students.' },
   ];
 
+  const daySlots = timetable
+    .filter((slot) => slot.dayOfWeek.toUpperCase() === selectedDay)
+    .sort((a, b) => toMinutes(a.startTime) - toMinutes(b.startTime));
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const academicYearStart = now.getMonth() >= 5 ? now.getFullYear() : now.getFullYear() - 1;
+  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  monday.setDate(monday.getDate() - weekdayIndex + weekOffset * 7);
+  const getDayDate = (day: string) => {
+    const date = new Date(monday);
+    date.setDate(monday.getDate() + scheduleDays.indexOf(day));
+    return date;
+  };
+  const selectedDate = getDayDate(selectedDay);
+  const isToday = selectedDate.toDateString() === new Date(now.getFullYear(), now.getMonth(), now.getDate()).toDateString();
+  const getStatus = (index: number) => {
+    if (!isToday) return 'SCHEDULED';
+    if (nowMinutes >= toMinutes(schedulePeriods[index].end)) return 'COMPLETED';
+    if (nowMinutes >= toMinutes(schedulePeriods[index].start)) return 'ONGOING';
+    return 'UPCOMING';
+  };
+  const activeIndex = isToday
+    ? schedulePeriods.findIndex((period) => nowMinutes >= toMinutes(period.start) && nowMinutes < toMinutes(period.end))
+    : -1;
+  const onBreak = isToday && ((nowMinutes >= 10 * 60 + 50 && nowMinutes < 11 * 60) || (nowMinutes >= 12 * 60 + 40 && nowMinutes < 13 * 60 + 30));
+  const completedCount = schedulePeriods.filter((_, index) => getStatus(index) === 'COMPLETED').length;
+  const upcomingCount = schedulePeriods.filter((_, index) => getStatus(index) === 'UPCOMING').length;
+  const futureClasses = schedulePeriods
+    .map((period, index) => ({ period, index, slot: daySlots[index], status: getStatus(index) }))
+    .filter((entry) => entry.slot && (!isToday || entry.status === 'UPCOMING' || entry.status === 'ONGOING'))
+    .slice(0, 3);
+  const activeSlot = activeIndex >= 0 ? daySlots[activeIndex] : undefined;
+  const nextSlot = futureClasses[0]?.slot;
+  const activeMinutesLeft = activeIndex >= 0 ? Math.max(0, toMinutes(schedulePeriods[activeIndex].end) - nowMinutes) : 0;
+  const activeTimeRemaining = activeIndex >= 0 ? Math.round((activeMinutesLeft / 50) * 100) : 0;
+
   return (
     <>
       <div className="parent-filter-tabs" style={{ marginBottom: '16px' }}>
+        <button className={activeTab === 'schedule' ? 'active' : ''} onClick={() => setActiveTab('schedule')}>
+          Ward’s Weekly Class Timetable
+        </button>
         <button className={activeTab === 'events' ? 'active' : ''} onClick={() => setActiveTab('events')}>
           Academic Events, Holidays &amp; PTMs
         </button>
-        <button className={activeTab === 'timetable' ? 'active' : ''} onClick={() => setActiveTab('timetable')}>
-          Ward’s Weekly Class Timetable
-        </button>
       </div>
 
-      {activeTab === 'events' ? (
+      {activeTab === 'schedule' ? (
+        <div className="timetable-page">
+          <div className="parent-calendar-toolbar">
+            <div className="timetable-term-card">
+              <div><small>Ward</small><strong>{profile.fullName}</strong></div>
+              <div><small>Academic Year</small><strong>{academicYearStart} – {academicYearStart + 1}</strong></div>
+              <div><small>Semester</small><strong>Semester {profile.currentSemester || '—'}</strong></div>
+              <button className="timetable-today-button" onClick={() => { setWeekOffset(0); setSelectedDay(today); }}>Today</button>
+              <span className="timetable-view-pill">Day View</span>
+            </div>
+          </div>
+
+          <section className="card timetable-day-strip" aria-label="Choose a day">
+            <button className="timetable-strip-arrow" aria-label="Previous week" title="Previous week" onClick={() => setWeekOffset((offset) => offset - 1)}><ChevronLeft size={17} /></button>
+            <div className="timetable-day-options">
+              {scheduleDays.map((day) => {
+                const date = getDayDate(day);
+                const selected = selectedDay === day;
+                return (
+                  <button key={day} className={`timetable-day-option ${selected ? 'selected' : ''} ${weekOffset === 0 && day === today && now.getDay() !== 0 ? 'today' : ''}`} onClick={() => setSelectedDay(day)} aria-pressed={selected}>
+                    <span>{scheduleDayName(day)}</span>
+                    <strong>{date.toLocaleDateString('en-US', { day: '2-digit' })}</strong>
+                    <small>{date.toLocaleDateString('en-US', { month: 'short' })}</small>
+                  </button>
+                );
+              })}
+            </div>
+            <button className="timetable-strip-arrow" aria-label="Next week" title="Next week" onClick={() => setWeekOffset((offset) => offset + 1)}><ChevronRight size={17} /></button>
+          </section>
+
+          <div className="timetable-content-grid">
+            <section className="card timetable-list-card">
+              <div className="timetable-list-heading">
+                <div>
+                  <h2>{isToday ? "Today's Timetable" : `${scheduleDayName(selectedDay)} Timetable`}</h2>
+                  <p>{selectedDate.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                </div>
+                <span className="timetable-period-count">7 Periods</span>
+              </div>
+
+              <div className="timetable-column-head">
+                <span>Time</span><span>Subject</span><span>Faculty</span><span>Room</span><span>Status</span>
+              </div>
+
+              <div className="timetable-period-list">
+                {schedulePeriods.map((period, index) => {
+                  const slot = daySlots[index];
+                  const status = getStatus(index);
+                  return <React.Fragment key={period.start}>
+                    {index === 2 && <div className="timetable-break tea-break"><Clock3 size={12} /> Break <span>10:50 AM – 11:00 AM</span></div>}
+                    {index === 4 && <div className="timetable-break lunch-break"><Clock3 size={12} /> Lunch Break <span>12:40 PM – 01:30 PM</span></div>}
+                    <article className={`timetable-period-row ${status.toLowerCase()}`}>
+                      <div className="timetable-time"><Clock3 size={13} /><strong>{period.start}</strong><span>{period.end}</span></div>
+                      <div className="timetable-subject-cell">
+                        <span className="timetable-subject-icon" style={scheduleSubjectAccents[index]}><BookOpen size={16} /></span>
+                        <div><strong>{slot?.subjectName ?? 'No class assigned'}</strong><small>{slot?.subjectCode || `Period ${index + 1}`} · {slot?.slotType || 'Scheduled Class'}</small><small className="timetable-mobile-details">{slot?.facultyName || 'Faculty TBA'} · {slot?.roomNumber || 'Room TBA'}</small></div>
+                      </div>
+                      <div className="timetable-faculty-cell"><span className="timetable-avatar">{slot?.facultyName ? slot.facultyName.split(' ').slice(-2).map((part) => part[0]).join('') : '—'}</span><span>{slot?.facultyName || 'Faculty TBA'}</span></div>
+                      <div className="timetable-room-cell"><MapPin size={13} /><span>{slot?.roomNumber || '—'}</span></div>
+                      <span className={`timetable-status ${status.toLowerCase()}`}>
+                        {status === 'COMPLETED' ? <Check size={12} /> : <Circle size={9} />}{status === 'SCHEDULED' ? 'SCHEDULED' : status}
+                      </span>
+                    </article>
+                  </React.Fragment>;
+                })}
+              </div>
+            </section>
+
+            <aside className="timetable-side-column">
+              <section className="card timetable-current-card">
+                <div className="timetable-side-heading">
+                  <span className={`timetable-live-pill ${activeSlot ? 'is-live' : ''}`}><i />{activeSlot ? 'LIVE NOW' : onBreak ? 'ON BREAK' : 'SCHEDULE'}</span>
+                  <h2>{activeSlot ? 'Current Class' : onBreak ? 'Break Time' : nextSlot ? 'Next Class' : 'Class Schedule'}</h2>
+                </div>
+                <div className="timetable-current-body">
+                  <span className="timetable-current-icon"><BookOpen size={19} /></span>
+                  <div className="timetable-current-info">
+                    <strong>{activeSlot?.subjectCode || nextSlot?.subjectCode || (onBreak ? 'Enjoy your break' : 'No current class')}</strong>
+                    <span>{activeSlot?.subjectName || nextSlot?.subjectName || 'Check the selected day schedule'}</span>
+                    {(activeSlot || nextSlot) && <small>{activeSlot?.startTime || futureClasses[0]?.period.start} – {activeSlot?.endTime || futureClasses[0]?.period.end}</small>}
+                  </div>
+                  {activeSlot && <div className="timetable-remaining-ring" style={{ background: `conic-gradient(#1677f2 ${activeTimeRemaining}%, #dcecff 0)` }}><div><strong>{activeMinutesLeft}</strong><small>min left</small></div></div>}
+                </div>
+                <div className="timetable-current-footer">
+                  <span><UserRound size={13} /> {activeSlot?.facultyName || nextSlot?.facultyName || 'Faculty details appear here'}</span>
+                  <span><MapPin size={13} /> {activeSlot?.roomNumber || nextSlot?.roomNumber || 'Room —'}</span>
+                </div>
+              </section>
+
+              <section className="card timetable-overview-card">
+                <div className="timetable-side-title"><CalendarDays size={15} /><h2>{isToday ? "Today's Overview" : `${scheduleDayName(selectedDay)} Overview`}</h2></div>
+                <div className="timetable-overview-stats">
+                  <div className="total"><CalendarDays size={14} /><strong>7</strong><span>Total Classes</span></div>
+                  <div className="complete"><Check size={14} /><strong>{completedCount}</strong><span>Completed</span></div>
+                  <div className="ongoing"><Clock3 size={14} /><strong>{isToday && activeIndex >= 0 ? 1 : 0}</strong><span>Ongoing</span></div>
+                  <div className="upcoming"><Circle size={14} /><strong>{isToday ? upcomingCount : 7}</strong><span>Upcoming</span></div>
+                </div>
+              </section>
+
+              <section className="card timetable-upcoming-card">
+                <div className="timetable-side-title"><Clock3 size={15} /><h2>Upcoming Classes</h2><span>{futureClasses.length}</span></div>
+                {futureClasses.length === 0 ? <p className="timetable-no-upcoming">No more classes scheduled for this day.</p> : (
+                  <div className="timetable-upcoming-list">
+                    {futureClasses.map(({ period, index, slot, status }) => (
+                      <div key={period.start} className={`timetable-upcoming-item ${status.toLowerCase()}`}>
+                        <span className="upcoming-marker" />
+                        <div><small>{period.start} – {period.end}</small><strong>{slot?.subjectName}</strong><span>{slot?.roomNumber} · {slot?.facultyName}</span></div>
+                        <em>{status}</em>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+
+              <section className="card timetable-insights-card">
+                <div className="timetable-side-title"><ArrowRight size={15} /><h2>Quick Insights</h2></div>
+                <div className="timetable-insight-grid">
+                  <div><strong>{daySlots.length}</strong><span>Scheduled</span></div>
+                  <div><strong>{new Set(daySlots.map((slot) => slot.facultyName)).size}</strong><span>Faculty</span></div>
+                  <div><strong>{new Set(daySlots.map((slot) => slot.roomNumber)).size}</strong><span>Rooms</span></div>
+                </div>
+                <p><Clock3 size={12} /> College hours: 9:00 AM – 4:00 PM</p>
+              </section>
+            </aside>
+          </div>
+        </div>
+      ) : (
         <div className="parent-calendar-layout">
           <Panel title="Semester Milestones &amp; Academic Dates" icon={CalendarDays}>
             <div className="parent-calendar-events">
@@ -2335,40 +2669,6 @@ const CalendarView: React.FC<{
             </div>
           </Panel>
         </div>
-      ) : (
-        <Panel title="Weekly Class Timetable (Mon – Sat)" icon={BookOpen}>
-          <div className="parent-table-wrap">
-            <table className="parent-table">
-              <thead>
-                <tr>
-                  <th>Day of Week</th>
-                  <th>Class Timings</th>
-                  <th>Subject</th>
-                  <th>Room Number</th>
-                  <th>Faculty Instructor</th>
-                </tr>
-              </thead>
-              <tbody>
-                {timetable.map((slot) => (
-                  <tr key={slot.id}>
-                    <td><strong>{slot.dayOfWeek}</strong></td>
-                    <td>{slot.startTime} – {slot.endTime}</td>
-                    <td><strong>{slot.subjectName}</strong></td>
-                    <td>{slot.roomNumber}</td>
-                    <td>{slot.facultyName}</td>
-                  </tr>
-                ))}
-                {!timetable.length && (
-                  <tr>
-                    <td colSpan={5}>
-                      <Empty text="No weekly timetable schedule published for this ward." />
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </Panel>
       )}
     </>
   );

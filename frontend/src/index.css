@@ -393,59 +393,59 @@ input, select, textarea {
 }
 
 .dashboard-grid {
-  grid-template-columns: minmax(0, 1fr) 380px;
+  grid-template-columns: minmax(0, 1fr) clamp(300px, 27%, 380px);
 }
 
 .attendance-overview-layout {
-  grid-template-columns: minmax(0, 1fr) 380px;
+  grid-template-columns: minmax(0, 1fr) clamp(300px, 27%, 380px);
 }
 
 .attendance-details-layout {
-  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-columns: minmax(0, 1fr) clamp(270px, 26%, 320px);
 }
 
 .fee-layout {
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 27%, 340px);
 }
 
 .fee-middle {
-  grid-template-columns: minmax(0, 1fr) 280px;
+  grid-template-columns: minmax(0, 1fr) clamp(240px, 24%, 280px);
 }
 
 .profilegrid {
-  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-columns: clamp(260px, 26%, 320px) minmax(0, 1fr);
 }
 
 .inbox-grid {
-  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-columns: clamp(260px, 26%, 320px) minmax(0, 1fr);
 }
 
 .exam-body-grid {
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 27%, 340px);
 }
 
 .assignment-content-grid {
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 27%, 340px);
 }
 
 .materials-layout {
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 27%, 340px);
 }
 
 .projects-layout:not(.portfolio-layout) {
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 27%, 340px);
 }
 
 .placements-layout {
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 27%, 340px);
 }
 
 .notices-layout:not(.notices-only) {
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 27%, 340px);
 }
 
 .coding-layout {
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 27%, 340px);
 }
 
 .card, .portal-card {
@@ -1796,7 +1796,7 @@ table tr:hover td, .portal-table tr:hover td, .placement-table tr:hover td {
 /* Dashboard */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 380px;
+  grid-template-columns: minmax(0, 1fr) clamp(300px, 27%, 380px);
   gap: 24px;
   align-items: start;
 }
@@ -2210,7 +2210,7 @@ table tr:hover td, .portal-table tr:hover td, .placement-table tr:hover td {
 }
 .parent-dashboard-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: minmax(0, 1fr) clamp(300px, 27%, 360px);
   gap: 20px;
   align-items: start;
   width: 100%;
@@ -2288,7 +2288,7 @@ table tr:hover td, .portal-table tr:hover td, .placement-table tr:hover td {
 }
 .parent-profile-layout {
   display: grid;
-  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-columns: clamp(260px, 26%, 320px) minmax(0, 1fr);
   gap: 20px;
   align-items: start;
   width: 100%;
@@ -2418,7 +2418,7 @@ table tr:hover td, .portal-table tr:hover td, .placement-table tr:hover td {
 }
 .parent-pay-fee-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 27%, 340px);
   gap: 20px;
   width: 100%;
   min-width: 0;
@@ -2516,7 +2516,7 @@ table tr:hover td, .portal-table tr:hover td, .placement-table tr:hover td {
 }
 .parent-calendar-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 27%, 340px);
   gap: 20px;
   width: 100%;
   min-width: 0;
@@ -2533,7 +2533,7 @@ table tr:hover td, .portal-table tr:hover td, .placement-table tr:hover td {
 }
 .parent-requests-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 27%, 340px);
   gap: 20px;
   width: 100%;
   min-width: 0;
@@ -2753,7 +2753,7 @@ table tr:hover td, .portal-table tr:hover td, .placement-table tr:hover td {
 
 .attendance-overview-layout {
   display: grid;
-  grid-template-columns: 1fr 380px;
+  grid-template-columns: minmax(0, 1fr) clamp(300px, 27%, 380px);
   gap: 24px;
   align-items: start;
 }
@@ -3043,7 +3043,7 @@ table tr:hover td, .portal-table tr:hover td, .placement-table tr:hover td {
 
 .attendance-details-layout {
   display: grid;
-  grid-template-columns: 1fr 320px;
+  grid-template-columns: minmax(0, 1fr) clamp(270px, 26%, 320px);
   gap: 24px;
   align-items: start;
 }
@@ -3177,7 +3177,7 @@ table tr:hover td, .portal-table tr:hover td, .placement-table tr:hover td {
 /* Fees */
 .fee-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 27%, 340px);
   gap: 24px;
   align-items: start;
   width: 100%;
@@ -3203,7 +3203,7 @@ table tr:hover td, .portal-table tr:hover td, .placement-table tr:hover td {
 }
 .fee-middle {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
+  grid-template-columns: minmax(0, 1fr) clamp(240px, 24%, 280px);
   gap: 20px;
   align-items: start;
   min-width: 0;
@@ -3211,7 +3211,7 @@ table tr:hover td, .portal-table tr:hover td, .placement-table tr:hover td {
 }
 .fee-checkout-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 27%, 340px);
   gap: 24px;
   align-items: start;
   width: 100%;
@@ -3597,7 +3597,7 @@ table tr:hover td, .portal-table tr:hover td, .placement-table tr:hover td {
 /* Timetable Content Grid */
 .timetable-content-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 27%, 340px);
   gap: 24px;
   align-items: start;
   width: 100%;
@@ -3647,7 +3647,7 @@ table tr:hover td, .portal-table tr:hover td, .placement-table tr:hover td {
 
 .timetable-column-head {
   display: grid;
-  grid-template-columns: 100px minmax(130px, 1fr) 140px 80px 100px;
+  grid-template-columns: 100px minmax(120px, 1fr) 130px 80px 100px;
   gap: 12px;
   padding: 8px 14px;
   font-size: 11px;
@@ -3687,7 +3687,7 @@ table tr:hover td, .portal-table tr:hover td, .placement-table tr:hover td {
 
 .timetable-period-row {
   display: grid;
-  grid-template-columns: 100px minmax(130px, 1fr) 140px 80px 100px;
+  grid-template-columns: 100px minmax(120px, 1fr) 130px 80px 100px;
   gap: 12px;
   align-items: center;
   padding: 12px 14px;
@@ -3812,6 +3812,9 @@ table tr:hover td, .portal-table tr:hover td, .placement-table tr:hover td {
   color: var(--text-secondary);
   font-weight: 600;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .timetable-status {
@@ -3825,6 +3828,8 @@ table tr:hover td, .portal-table tr:hover td, .placement-table tr:hover td {
   text-transform: uppercase;
   letter-spacing: 0.04em;
   width: fit-content;
+  max-width: 100%;
+  white-space: nowrap;
 }
 
 .timetable-status.ongoing {
@@ -4289,7 +4294,7 @@ table tr:hover td, .portal-table tr:hover td, .placement-table tr:hover td {
 
 .exam-body-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 27%, 340px);
   gap: 24px;
   align-items: start;
   width: 100%;
@@ -4929,6 +4934,16 @@ table tr:hover td, .portal-table tr:hover td, .placement-table tr:hover td {
 }
 
 /* Responsive adjustments */
+
+/* The 5-column timetable list needs ~660px; with the 340px side column it only
+   gets that on wide screens, so stack the side column earlier to avoid the
+   Status column being clipped by the card's overflow:hidden. */
+@media (max-width: 1400px) {
+  .timetable-content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 1100px) {
   .timetable-content-grid,
   .exam-body-grid {
@@ -5011,7 +5026,7 @@ table tr:hover td, .portal-table tr:hover td, .placement-table tr:hover td {
 
 .profilegrid {
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: clamp(260px, 26%, 320px) minmax(0, 1fr);
   gap: 24px;
   align-items: start;
 }
@@ -5472,7 +5487,7 @@ tr.row-selected td:first-child {
 
 .exam-revaluation-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 27%, 340px);
   gap: 24px;
   align-items: start;
   width: 100%;
@@ -5723,7 +5738,7 @@ tr.row-selected td:first-child {
 
 .assignment-content-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 27%, 340px);
   gap: 24px;
   align-items: start;
   width: 100%;
@@ -6352,7 +6367,7 @@ tr.row-selected td:first-child {
 
 .materials-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 27%, 340px);
   gap: 24px;
   align-items: start;
   width: 100%;
@@ -6871,7 +6886,7 @@ tr.row-selected td:first-child {
 
 .projects-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 27%, 340px);
   gap: 24px;
   align-items: start;
   width: 100%;
@@ -7115,7 +7130,7 @@ tr.row-selected td:first-child {
 
 .student-portfolio-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 27%, 340px);
   gap: 20px;
   align-items: start;
   width: 100%;
@@ -7231,7 +7246,7 @@ tr.row-selected td:first-child {
 
 .placements-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 27%, 340px);
   gap: 24px;
   align-items: start;
   width: 100%;
@@ -7491,7 +7506,7 @@ tr.row-selected td:first-child {
 .placement-application-layout,
 .company-detail-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 27%, 340px);
   gap: 24px;
   align-items: start;
   width: 100%;
@@ -7499,7 +7514,7 @@ tr.row-selected td:first-child {
 }
 
 .company-detail-layout {
-  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-columns: clamp(260px, 26%, 320px) minmax(0, 1fr);
 }
 
 /* =========================================================================
@@ -7517,7 +7532,7 @@ tr.row-selected td:first-child {
 
 .notices-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 27%, 340px);
   gap: 24px;
   align-items: start;
   width: 100%;
@@ -7710,7 +7725,7 @@ tr.row-selected td:first-child {
 
 .event-detail-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-columns: minmax(0, 1fr) clamp(270px, 26%, 320px);
   gap: 24px;
   align-items: start;
   width: 100%;
@@ -7813,7 +7828,7 @@ tr.row-selected td:first-child {
 /* Service detail form */
 .service-detail-layout {
   display: grid;
-  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-columns: clamp(260px, 26%, 320px) minmax(0, 1fr);
   gap: 24px;
   align-items: start;
   width: 100%;
@@ -7893,7 +7908,7 @@ tr.row-selected td:first-child {
 
 .service-detail-layout {
   display: grid;
-  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-columns: clamp(260px, 26%, 320px) minmax(0, 1fr);
   gap: 24px;
   align-items: start;
   width: 100%;
@@ -7941,7 +7956,7 @@ tr.row-selected td:first-child {
 
 .coding-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 27%, 340px);
   gap: 24px;
   align-items: start;
   width: 100%;
@@ -8186,7 +8201,7 @@ tr.row-selected td:first-child {
 
 .inbox-grid {
   display: grid;
-  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-columns: clamp(260px, 26%, 320px) minmax(0, 1fr);
   gap: 20px;
   align-items: stretch;
   min-height: 560px;
@@ -13429,4 +13444,388 @@ html[data-theme='dark'] .parent-table-wrap thead th {
     width: 100%;
     justify-content: center;
   }
+}
+
+/* =========================================================================
+   9. MODERN & VIBRANT REFRESH — global polish layer (full sweep)
+   Appended last on purpose: these rules intentionally win over earlier
+   same-element declarations. Everything is token-driven so the dark theme
+   keeps working.
+   ========================================================================= */
+
+/* ---- 9.1 Layout guard: right-hand rails stack BEFORE they squeeze the
+         middle column. Sidebar (260px) + page padding (72px) + gap (24px)
+         means side-by-side layouts need ~1300px of viewport width to keep
+         the centre column readable; below that the rail flows underneath
+         the main content at full width instead of crushing it. ---- */
+@media (max-width: 1300px) {
+  .dashboard-grid,
+  .attendance-overview-layout,
+  .attendance-details-layout,
+  .fee-layout,
+  .fee-middle,
+  .fee-checkout-layout,
+  .exam-body-grid,
+  .assignment-content-grid,
+  .materials-layout,
+  .projects-layout,
+  .placements-layout,
+  .placement-application-layout,
+  .student-portfolio-grid,
+  .notices-layout,
+  .coding-layout,
+  .exam-revaluation-layout,
+  .event-detail-layout,
+  .parent-dashboard-grid,
+  .parent-pay-fee-layout,
+  .parent-calendar-layout,
+  .parent-requests-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---- 9.2 Ambient canvas: soft indigo/sky light instead of a flat grey ---- */
+body {
+  background:
+    radial-gradient(1100px 540px at 100% -10%, rgba(79, 70, 229, 0.08), transparent 62%),
+    radial-gradient(900px 480px at -10% 0%, rgba(2, 132, 199, 0.06), transparent 58%),
+    var(--bg);
+}
+html[data-theme='dark'] body {
+  background:
+    radial-gradient(1100px 540px at 100% -10%, rgba(99, 102, 241, 0.16), transparent 62%),
+    radial-gradient(900px 480px at -10% 0%, rgba(14, 165, 233, 0.12), transparent 58%),
+    var(--bg);
+}
+
+/* ---- 9.3 Frosted topbar over the scrolling content ---- */
+.topbar {
+  background: rgba(255, 255, 255, 0.72);
+  border-bottom-color: rgba(148, 163, 184, 0.4);
+  box-shadow: 0 14px 34px -26px rgba(15, 23, 42, 0.65);
+}
+html[data-theme='dark'] .topbar {
+  background: rgba(8, 13, 28, 0.72);
+  border-bottom-color: rgba(51, 65, 85, 0.7);
+  box-shadow: 0 14px 34px -26px rgba(0, 0, 0, 0.85);
+}
+
+/* ---- 9.4 Cards: rounder, softer layered shadow, gentle lift on hover ---- */
+.card, .portal-card {
+  border-radius: var(--radius-xl);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 14px 34px -22px rgba(15, 23, 42, 0.3);
+}
+.card:hover, .portal-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06), 0 26px 52px -26px rgba(15, 23, 42, 0.4);
+}
+
+/* ---- 9.5 Page heroes get a brand gradient wash + gradient icon chips ---- */
+.portal-hero, .page-heading, .attendance-heading, .exam-page-heading, .assignment-hero,
+.course-hero, .project-hero, .placement-hero, .fee-hero, .notice-hero, .service-hero,
+.coding-hero, .materials-hero, .messages-hero, .projects-hero, .placements-hero,
+.student-profile-hero, .subject-materials-hero, .hero, .notices-hero, .services-hero {
+  background:
+    linear-gradient(120deg, rgba(79, 70, 229, 0.10) 0%, rgba(124, 58, 237, 0.07) 45%, rgba(2, 132, 199, 0.05) 100%),
+    var(--surface);
+  border-color: rgba(99, 102, 241, 0.22);
+}
+html[data-theme='dark'] .portal-hero, html[data-theme='dark'] .page-heading,
+html[data-theme='dark'] .attendance-heading, html[data-theme='dark'] .exam-page-heading,
+html[data-theme='dark'] .assignment-hero, html[data-theme='dark'] .course-hero,
+html[data-theme='dark'] .project-hero, html[data-theme='dark'] .placement-hero,
+html[data-theme='dark'] .fee-hero, html[data-theme='dark'] .notice-hero,
+html[data-theme='dark'] .service-hero, html[data-theme='dark'] .coding-hero,
+html[data-theme='dark'] .materials-hero, html[data-theme='dark'] .messages-hero,
+html[data-theme='dark'] .projects-hero, html[data-theme='dark'] .placements-hero,
+html[data-theme='dark'] .student-profile-hero, html[data-theme='dark'] .subject-materials-hero,
+html[data-theme='dark'] .hero, html[data-theme='dark'] .notices-hero,
+html[data-theme='dark'] .services-hero {
+  background:
+    linear-gradient(120deg, rgba(99, 102, 241, 0.20) 0%, rgba(139, 92, 246, 0.14) 45%, rgba(2, 132, 199, 0.10) 100%),
+    var(--surface);
+  border-color: rgba(99, 102, 241, 0.32);
+}
+
+.portal-hero-icon, .attendance-title-icon, .exam-page-icon, .materials-hero-icon,
+.projects-hero-icon, .placements-hero-icon, .timetable-title-icon, .subject-materials-book-icon,
+.section-icon {
+  background: linear-gradient(135deg, #6366F1 0%, #7C3AED 100%);
+  color: #FFFFFF;
+  border-color: transparent;
+  box-shadow: 0 8px 18px -10px rgba(79, 70, 229, 0.9);
+}
+
+.head h2, .portal-section-head h2 {
+  font-size: 16px;
+  letter-spacing: -0.01em;
+}
+
+.hero-copy h1 {
+  font-size: clamp(21px, 2.6vw, 27px);
+}
+
+/* ---- 9.6 Buttons: gradient primary with glow, tinted outline hover ---- */
+.btn-primary, .solid-button {
+  background: linear-gradient(135deg, #6366F1 0%, #4F46E5 55%, #4338CA 100%);
+  border-color: transparent;
+  box-shadow: 0 4px 14px -4px rgba(79, 70, 229, 0.55);
+}
+.btn-primary:hover, .solid-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #7C74F3 0%, #5A52EA 55%, #4338CA 100%);
+  border-color: transparent;
+  box-shadow: 0 10px 22px -8px rgba(79, 70, 229, 0.65);
+  transform: translateY(-1px);
+}
+.btn-primary:active:not(:disabled), .solid-button:active:not(:disabled) {
+  transform: translateY(0) scale(0.985);
+}
+.btn-secondary, .outline-button {
+  background: var(--surface);
+}
+.btn-secondary:hover, .outline-button:hover {
+  background: var(--primary-light);
+  border-color: var(--primary-border);
+  color: var(--primary);
+}
+html[data-theme='dark'] .btn-secondary:hover, html[data-theme='dark'] .outline-button:hover {
+  color: #A5B4FC;
+}
+
+/* ---- 9.7 Tables: tinted header band, indigo row hover, modern table actions ---- */
+table th, .portal-table th, .placement-table th,
+.tablewrap thead th, .portal-table-wrap thead th,
+.placement-table-scroll thead th {
+  background: linear-gradient(180deg, rgba(79, 70, 229, 0.07), rgba(79, 70, 229, 0.02)), var(--surface-sub);
+}
+html[data-theme='dark'] table th, html[data-theme='dark'] .portal-table th,
+html[data-theme='dark'] .placement-table th, html[data-theme='dark'] .tablewrap thead th,
+html[data-theme='dark'] .portal-table-wrap thead th,
+html[data-theme='dark'] .placement-table-scroll thead th {
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.18), rgba(99, 102, 241, 0.06)), var(--surface-muted);
+}
+
+table tr, .portal-table tr, .placement-table tr {
+  transition: background var(--transition-fast);
+}
+table tr:hover td, .portal-table tr:hover td, .placement-table tr:hover td {
+  background: rgba(79, 70, 229, 0.05);
+}
+html[data-theme='dark'] table tr:hover td, html[data-theme='dark'] .portal-table tr:hover td,
+html[data-theme='dark'] .placement-table tr:hover td {
+  background: rgba(99, 102, 241, 0.12);
+}
+
+.table-action {
+  background: var(--surface-sub);
+}
+.table-action:hover {
+  background: var(--surface-muted);
+}
+.table-action.primary {
+  background: linear-gradient(135deg, #6366F1 0%, #4F46E5 55%, #4338CA 100%);
+  border-color: transparent;
+}
+.table-action.primary:hover {
+  background: linear-gradient(135deg, #7C74F3 0%, #5A52EA 55%, #4338CA 100%);
+}
+
+/* ---- 9.8 Sidebar: gradient depth, tinted brand band, glowing active pill ---- */
+.sidebar {
+  background: linear-gradient(180deg, #0F172A 0%, #111C36 48%, #0B1224 100%);
+  border-right-color: rgba(99, 102, 241, 0.16);
+}
+html[data-theme='dark'] .sidebar {
+  background: linear-gradient(180deg, #070B17 0%, #0A1128 48%, #060A16 100%);
+  border-right-color: rgba(99, 102, 241, 0.2);
+}
+.brand {
+  background: linear-gradient(180deg, rgba(79, 70, 229, 0.22), rgba(79, 70, 229, 0.03));
+}
+.nav:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #FFFFFF;
+}
+.nav.active {
+  background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+  box-shadow: 0 6px 16px -6px rgba(99, 102, 241, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+/* ---- 9.9 Chips, focus rings, selection & scrollbars ---- */
+.badge.primary, .portal-pill.primary, .status-badge.primary {
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.14), rgba(124, 58, 237, 0.14));
+}
+.hero-copy .meta span {
+  border-radius: 999px;
+}
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+::selection {
+  background: rgba(79, 70, 229, 0.3);
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-muted);
+}
+
+/* ---- 9.10 Micro-interactions & empty states ---- */
+.link-button svg {
+  transition: transform var(--transition-fast);
+}
+.link-button:hover svg {
+  transform: translateX(2px);
+}
+.back-link svg {
+  transition: transform var(--transition-fast);
+}
+.back-link:hover svg {
+  transform: translateX(-2px);
+}
+.stat .value, .portal-stat strong {
+  font-variant-numeric: tabular-nums;
+}
+.materials-empty, .projects-empty, .inbox-empty, .attendance-empty {
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(70% 130% at 50% 0%, rgba(79, 70, 229, 0.06), transparent 72%),
+    var(--surface-sub);
+}
+
+/* ---- 9.11 Gentle page entrance (reduced-motion users keep the calm UI) ---- */
+@keyframes cc-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.content > * {
+  animation: cc-rise 360ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+/* ---- 9.12 Parent portal parity (same visual language as the student side) ---- */
+/* Panels get the layered card shadow + hover lift used by .card */
+.parent-panel,
+.parent-ward-card {
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 14px 34px -22px rgba(15, 23, 42, 0.3);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast),
+    border-color var(--transition-fast);
+}
+.parent-panel:hover,
+.parent-ward-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06), 0 26px 52px -26px rgba(15, 23, 42, 0.4);
+}
+html[data-theme='dark'] .parent-panel,
+html[data-theme='dark'] .parent-ward-card {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 16px 36px -24px rgba(0, 0, 0, 0.7);
+}
+
+/* Metric grids reflow instead of squeezing 4 fixed columns */
+.parent-metrics-grid {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+/* Swap hardcoded semantic tints for tokens so dark mode stays comfortable */
+.parent-alert {
+  background: var(--warning-light);
+  border-color: var(--warning-border);
+  color: var(--warning-text);
+}
+.parent-all-clear,
+.parent-all-clear-box {
+  background: var(--success-light);
+  border-color: var(--success-border);
+  color: var(--success-text);
+}
+.parent-payment-success-card,
+.parent-success-alert {
+  background: var(--success-light);
+  border-color: var(--success-border);
+  color: var(--success-text);
+}
+.parent-receipt-pill {
+  background: var(--primary-light);
+}
+.parent-logout-button {
+  background: var(--danger-light);
+  border-color: var(--danger-border);
+  color: var(--danger-text);
+}
+.parent-notice-card,
+.parent-receipt-preview {
+  background: var(--surface-sub);
+}
+
+/* Tinted table headers + indigo row hover (matches student tables) */
+.parent-table-wrap thead th {
+  background: linear-gradient(180deg, rgba(79, 70, 229, 0.07), rgba(79, 70, 229, 0.02)),
+    var(--surface-sub);
+}
+html[data-theme='dark'] .parent-table-wrap thead th {
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.18), rgba(99, 102, 241, 0.06)),
+    var(--surface-muted);
+}
+.parent-table tbody tr:hover td {
+  background: rgba(79, 70, 229, 0.05);
+}
+html[data-theme='dark'] .parent-table tbody tr:hover td {
+  background: rgba(99, 102, 241, 0.12);
+}
+
+/* Hero + panel heading sizing parity with the student side */
+.parent-hero-copy h1 {
+  font-size: clamp(21px, 2.4vw, 26px);
+  letter-spacing: -0.02em;
+}
+.parent-panel-heading h2,
+.parent-panel-heading h3 {
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+.parent-metric strong {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Micro-interactions: arrow nudge on text actions, gradient unread pill */
+.parent-text-action svg,
+.parent-panel-action svg {
+  transition: transform var(--transition-fast);
+}
+.parent-text-action:hover svg,
+.parent-panel-action:hover svg {
+  transform: translateX(2px);
+}
+.parent-unread-count {
+  background: linear-gradient(135deg, #6366f1, #7c3aed);
+}
+
+/* ---- 9.13 Parent portal — student-parity attendance & academic-calendar views ---- */
+/* Right-align the ward term card above the day strip (student timetable language) */
+.parent-calendar-toolbar {
+  display: flex;
+  justify-content: flex-end;
 }
